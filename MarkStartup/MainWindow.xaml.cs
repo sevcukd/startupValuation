@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,6 +21,16 @@ namespace MarkStartup
     /// </summary>
     public partial class MainWindow : Window
     {
+        Dictionary<double, List<Values>> linguisticValues = new Dictionary<double, List<Values>>();
+        List<Key> keys = new List<Key>
+        {
+            new Key {NumberGroup=1, Iterator = 3 },
+            new Key {NumberGroup=2, Iterator = 3 },
+            new Key {NumberGroup=3, Iterator = 5 },
+            new Key {NumberGroup=4, Iterator = 4 },
+            new Key {NumberGroup=5, Iterator = 3 },
+        };
+        List<double> tmpRes = new List<double>();
         public MainWindow()
         {
             InitializeComponent();
@@ -121,7 +132,7 @@ namespace MarkStartup
             }
             else if (group_three_amount <= (group_three_min + group_three_max) / 2)
             {
-                group_three_function_membership =  2 * Math.Pow((group_three_max - group_three_amount) / (group_three_max - group_three_min), 2);
+                group_three_function_membership = 2 * Math.Pow((group_three_max - group_three_amount) / (group_three_max - group_three_min), 2);
             }
             else if (group_three_amount < group_three_max)
             {
@@ -136,7 +147,7 @@ namespace MarkStartup
             }
             else if (group_four_amount <= (group_four_min + group_four_max) / 2)
             {
-                group_four_function_membership =  2 * Math.Pow((group_four_max - group_four_amount) / (group_four_max - group_four_min), 2);
+                group_four_function_membership = 2 * Math.Pow((group_four_max - group_four_amount) / (group_four_max - group_four_min), 2);
             }
             else if (group_four_amount < group_four_max)
             {
@@ -159,10 +170,10 @@ namespace MarkStartup
             }
             else group_five_function_membership = 1;
 
-            
-             
-             
-             
+
+
+
+
 
 
             // Обчислення функції бажаної належності
@@ -174,112 +185,66 @@ namespace MarkStartup
 
 
             // Обчислення функції лінгвістиних змінних
-            double group_one_linguistic_variable = Math.Abs((4 * group_one_function_membership - 4 * group_one_function_desired_membership) / group_one_function_desired_membership);
-            double group_two_linguistic_variable = Math.Abs((4 * group_two_function_membership - 4 * group_two_function_desired_membership) / group_two_function_desired_membership);
-            double group_three_linguistic_variable = Math.Abs((5 * group_three_function_desired_membership - 4 * group_three_function_membership) / group_three_function_desired_membership);
-            double group_four_linguistic_variable = Math.Abs((4 * group_four_function_membership - 4 * group_four_function_desired_membership) / group_four_function_desired_membership);
-            double group_five_linguistic_variable = 1;
-            ///////
+            linguisticValues.Clear();
+            getLinguisticValues(1, group_one_function_membership, group_one_function_desired_membership);
+            getLinguisticValues(2, group_two_function_membership, group_two_function_desired_membership);
+            getLinguisticValues(3, group_three_function_membership, group_three_function_desired_membership);
+            getLinguisticValues(4, group_four_function_membership, group_four_function_desired_membership);
+            getLinguisticValues(5, group_five_function_membership, group_five_function_desired_membership);
 
 
-            //Обчислення наступної функції належності
-            //double group_one_next_function_membership = 0;
-            //double group_two_next_function_membership = 0;
-            //double group_three_next_function_membership = 0;
-            //double group_four_next_function_membership = 0;
-            //double group_five_next_function_membership = 0;
-            ////1
 
-            //if (group_one_amount <= (group_one_min + group_one_max) / 2)
-            //{
-            //    if (group_one_linguistic_variable < 1 - group_one_linguistic_variable)
-            //    {
-            //        group_one_next_function_membership = group_one_linguistic_variable;
-            //    }
-            //    else group_one_next_function_membership = 1 - group_one_linguistic_variable;
+            foreach (var item in linguisticValues)
+            {
+                List<Values> lingValue = item.Value;
+                double a = 0, b = 0;
 
+                for (int i = 0; i < lingValue.Count; i++)
+                {
+                    double keyA = 0, keyB = 0;
+                    if (keys.Any(key => key.NumberGroup == item.Key && key.Iterator == lingValue[i].NumberFormula))
+                    {
+                        keyA = lingValue[i].Res;
+                    }
+                    else
+                    {
+                        keyA = 0;
+                    }
+                    if ((lingValue[i].NumberFormula == keys[i].Iterator + 1 && keys[Convert.ToInt32(lingValue[i].NumberGroup - 1)].NumberGroup == lingValue[i].NumberGroup) ||
+                        (lingValue[i].NumberFormula == keys[i].Iterator - 1 && keys[Convert.ToInt32(lingValue[i].NumberGroup - 1)].NumberGroup == lingValue[i].NumberGroup))
+                    {
+                        keyB = lingValue[i].Res / 2;
+                    }
+                    else
+                    {
+                        keyB = 0;
+                    }
 
-            //}
-            //else 
-            //{
-            //    if (group_one_linguistic_variable > 1 - group_one_linguistic_variable)
-            //    {
-            //        group_one_next_function_membership = group_one_linguistic_variable;
-            //    }
-            //    else group_one_next_function_membership = 1 - group_one_linguistic_variable;
+                    if (a == 0)
+                    {
+                        a = Math.Max(keyA, keyB);
+                    }
+                    else
+                    {
+                        b = Math.Max(keyA, keyB);
+                    }
+                }
+                tmpRes.Add(Math.Max(a, b));
 
-            //}
-
-
-            ////2
-
-            // if (group_two_amount <= (group_two_min + group_two_max) / 2)
-            //{
-            //    if (group_two_linguistic_variable < 1 - group_two_linguistic_variable)
-            //    {
-            //        group_two_next_function_membership = group_two_linguistic_variable;
-            //    }
-            //    else group_two_next_function_membership = 1 - group_two_linguistic_variable;
-            //}
-            //else
-            //{
-            //    if (group_two_linguistic_variable > 1 - group_two_linguistic_variable)
-            //    {
-            //        group_two_next_function_membership = group_two_linguistic_variable;
-            //    }
-            //    else group_two_next_function_membership = 1 - group_two_linguistic_variable;
-            //}
+            }
 
 
-            ////3
-            //if (group_three_amount <= (group_three_min + group_three_max) / 2)
-            //{
-            //    if (group_three_linguistic_variable < 1 - group_three_linguistic_variable)
-            //    {
-            //        group_three_next_function_membership = group_three_linguistic_variable;
-            //    }
-            //    else group_three_next_function_membership = 1 - group_three_linguistic_variable;
-            //}
-            //else 
-            //{
-            //    if (group_three_linguistic_variable > 1 - group_three_linguistic_variable)
-            //    {
-            //        group_three_next_function_membership = group_three_linguistic_variable;
-            //    }
-            //    else group_three_next_function_membership = 1 - group_three_linguistic_variable;
-            //}
+            double group_one_linguistic_variable = tmpRes[0];
+            double group_two_linguistic_variable = tmpRes[1];
+            double group_three_linguistic_variable = tmpRes[2];
+            double group_four_linguistic_variable = tmpRes[3];
+            double group_five_linguistic_variable = tmpRes[4];
 
 
-            ////4
-            // if (group_four_amount <= (group_four_min + group_four_max) / 2)
-            //{
-            //    if (group_four_linguistic_variable < 1 - group_four_linguistic_variable)
-            //    {
-            //        group_four_next_function_membership = group_four_linguistic_variable;
-            //    }
-            //    else group_four_next_function_membership = 1 - group_four_linguistic_variable;
-            //}
-            //else 
-            //{
-            //    if (group_four_linguistic_variable > 1 - group_four_linguistic_variable)
-            //    {
-            //        group_four_next_function_membership = group_four_linguistic_variable;
-            //    }
-            //    else group_four_next_function_membership = 1 - group_four_linguistic_variable;
-            //}
 
 
-            ////5
-            //group_five_next_function_membership = 0;
 
 
-            double group_one_next_function_membership = group_one_linguistic_variable / 2;
-            double group_two_next_function_membership = 1 - group_two_linguistic_variable;
-            double bb = 1 - group_three_linguistic_variable;
-            double group_three_next_function_membership = bb / 2;
-            double aa = 1 - group_four_linguistic_variable;
-            double group_four_next_function_membership = aa / 2;
-            double group_five_next_function_membership = 0;
 
             //Вагові коефіціенти
             double group_one_weight_variable = Convert.ToInt32(group_one_weight_variableForm.Text);
@@ -301,28 +266,25 @@ namespace MarkStartup
 
             //Обчислення агрегованої оцінки
 
-            //double mark = group_one_next_function_membership * group_one_normalized_weight  + group_two_next_function_membership * group_two_normalized_weight + group_three_next_function_membership * group_three_normalized_weight  + group_four_next_function_membership * group_four_normalized_weight + group_five_next_function_membership * group_five_normalized_weight;
-            //double mark = group_one_linguistic_variable * group_one_normalized_weight + group_two_linguistic_variable * group_two_normalized_weight + group_three_linguistic_variable * group_three_normalized_weight + group_four_linguistic_variable * group_four_normalized_weight + group_five_linguistic_variable * group_five_normalized_weight;
 
-
-            double a1 = group_one_next_function_membership * group_one_normalized_weight;
-            double a2 = group_two_next_function_membership * group_two_normalized_weight;
-            double a3 = group_three_next_function_membership * group_three_normalized_weight;
-            double a4 = group_four_next_function_membership * group_four_normalized_weight;
-            double a5 = group_five_next_function_membership * group_five_normalized_weight;
+            double a1 = group_one_linguistic_variable * group_one_normalized_weight;
+            double a2 = group_two_linguistic_variable * group_two_normalized_weight;
+            double a3 = group_three_linguistic_variable * group_three_normalized_weight;
+            double a4 = group_four_linguistic_variable * group_four_normalized_weight;
+            double a5 = group_five_linguistic_variable * group_five_normalized_weight;
             double mark = a1 + a2 + a3 + a4 + a5;
 
             //Вивід даних
-            markForm.Text =Math.Round(mark,3).ToString();
-            if (mark>0.67)
+            markForm.Text = Math.Round(mark, 3).ToString();
+            if (mark > 0.67)
             {
                 conclusion.Text = "оцінка ідеї висока";
             }
-            else if (mark > 0.47 && mark <=0.67)
+            else if (mark > 0.47 && mark <= 0.67)
             {
                 conclusion.Text = "оцінка ідеї вище середнього";
             }
-            else if (mark >0.36 && mark <= 0.47)
+            else if (mark > 0.36 && mark <= 0.47)
             {
                 conclusion.Text = "оцінка ідеї середня";
             }
@@ -343,5 +305,116 @@ namespace MarkStartup
             group_four_amountForm.Text = group_four_amount.ToString();
             group_five_amountForm.Text = group_five_amount.ToString();
         }
+        public void getLinguisticValues(int index, double x, double a)
+        {
+            List<Values> tmp = new List<Values>();
+            for (int i = 0; i < 5; i++)
+            {
+                double u = getMU(i, x, a);
+
+                if (u != 0)
+                {
+                    u = Math.Round(u, 2);
+                    tmp.Add(new Values { NumberFormula = i, Res = u , NumberGroup = index});
+                    //gLinguistic.push( key: `U_${ i + 1} _${ j}`, value: parseFloat(u));
+                }
+            }
+            linguisticValues.Add(index, tmp);
+        }
+
+        public double getMU(int index, double x, double a)
+        {
+            switch (index)
+            {
+                case 1:
+                    return mu1(x, a);
+                case 2:
+                    return mu2(x, a);
+                case 3:
+                    return mu3(x, a);
+                case 4:
+                    return mu4(x, a);
+                case 5:
+                    return mu5(x, a);
+            }
+            return 0;
+        }
+
+        public double mu1(double x, double a)
+        {
+            if (x <= (a - a / 2))
+            {
+                return 1;
+            }
+            else if ((a - a / 2) < x && x <= (a - a / 4))
+            {
+                return (3 * a - 4 * x) / a;
+            }
+            else { return 0; }
+        }
+
+        public double mu2(double x, double a)
+        {
+            if ((a - a / 2) < x && x <= (a - a / 4))
+            {
+                return (4 * x - 2 * a) / a;
+            }
+            else if (a - a / 4 < x && x <= a)
+            {
+                return (4 * a - 4 * x) / a;
+            }
+            else { return 0; }
+        }
+
+        public double mu3(double x, double a)
+        {
+            if (a - a / 4 < x && x <= a)
+            {
+                return (4 * x - 3 * a) / a;
+            }
+            else if (a < x && x <= a + a / 4)
+            {
+                return (5 * a - 4 * x) / a;
+            }
+            else { return 0; }
+        }
+
+        public double mu4(double x, double a)
+        {
+            if (a < x && x <= a + a / 4)
+            {
+                return (4 * x - 4 * a) / a;
+            }
+            else if (a + a / 4 < x && x <= a + a / 2)
+            {
+                return (6 * a - 4 * x) / a;
+            }
+            else { return 0; }
+        }
+
+        public double mu5(double x, double a)
+        {
+            if (a + a / 4 < x && x <= a + a / 2)
+            {
+                return (4 * x - 5 * a) / a;
+            }
+            else if (x >= a + a / 2)
+            {
+                return 1;
+            }
+            else { return 0; }
+        }
+        public class Key
+        {
+            public double NumberGroup { get; set; }
+            public double Iterator { get; set; }
+        }
+        public class Values
+        {
+            public double NumberGroup { get; set; }
+            public double NumberFormula { get; set; }
+            public double Res { get; set; }
+        }
     }
 }
+
